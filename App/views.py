@@ -17,7 +17,7 @@ class PasswordListView(ListView):
 
 
 class PasswordCreateView(CreateView):
-    def get(selfs, request):
+    def get(self, request):
         formulario = PasswordForm()
         return render(request, 'password_create.html', {'formulario': formulario})
 
