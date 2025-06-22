@@ -31,8 +31,27 @@ jobs:
       - name: Run Tests
         run: python manage.py test
 
-      - name: Run SonarQube Analysis
-        uses: SonarSource/sonarqube-scan-action@v5
+  sonar:
+    name: Análisis SonarQube
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      - name: Install SonarQube Scanner
+        run: |
+            curl -sSLo sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.8.0.2856-linux.zip
+            unzip sonar-scanner.zip
+            mv sonar-scanner-4.8.0.2856-linux sonar-scanner
+            export PATH=$PATH:$PWD/sonar-scanner/bin
+
+      - name: Run SonarQube Scanner
+        run: sonar-scanner
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
