@@ -9,16 +9,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    services:
-      sonarqube:
-        image: sonarqube:latest
-        ports:
-          - 9000:9000
-        options: >-
-          --health-cmd "curl --fail http://localhost:9000/api/system/health || exit 1" 
-          --health-interval 10s 
-          --health-timeout 5s 
-          --health-retries 5
 
     strategy:
       max-parallel: 4
@@ -41,17 +31,8 @@ jobs:
       - name: Run Tests
         run: python manage.py test
 
-      - name: Wait for SonarQube to be ready
-        run: |
-          for i in {1..10}; do
-            curl -s http://localhost:9000/api/system/health && exit 0 || sleep 10;
-          done
-          exit 1
-
-      - name: Run SonarQube Scanner
-        run: |
-          docker run -e SONAR_HOST_URL=http://localhost:9000 \
-            -e SONAR_TOKEN=${{ secrets.SONAR_TOKEN }} \
-            sonarsource/sonar-scanner-cli \
-            -Dsonar.projectKey=Password-Generator \
-            -Dsonar.sources=.
+      - name: Run SonarQube Analysis
+        uses: SonarSource/sonarqube-scan-action@v5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
